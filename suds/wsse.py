@@ -64,10 +64,12 @@ class Security(Object):
     @type keys: TBD
     """
 
-    def __init__(self):
+    def __init__(self, use_timestamp=False):
         """ """
         Object.__init__(self)
         self.mustUnderstand = True
+        self.useTimestamp = use_timestamp
+        self.validity = 90
         self.tokens = []
         self.signatures = []
         self.references = []
@@ -81,8 +83,23 @@ class Security(Object):
         """
         root = Element('Security', ns=wssens)
         root.set('mustUnderstand', str(self.mustUnderstand).lower())
+
+        if self.useTimestamp:
+            now = Token.utc()
+            exp_ts = now + timedelta(seconds=self.validity)
+
+            ts = Element('Timestamp', ns=wsuns)
+            created = Element('Created', ns=wsuns)
+            created.setText(str(DateTime(now)))
+            expires = Element('Expires', ns=wsuns)
+            expires.setText(str(DateTime(exp_ts)))
+            ts.append(created)
+            ts.append(expires)
+            root.append(ts)
+
         for t in self.tokens:
             root.append(t.xml())
+
         return root
 
 
