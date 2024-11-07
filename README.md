@@ -159,7 +159,7 @@ You can inspect service object with: `__str()__` as follows to get a
 list of methods provide by the service:
 
 ```py
-print client
+print(client)
 
 Suds - version: 0.3.3 build: (beta) R397-20081121
 
@@ -202,14 +202,14 @@ method would be invoked as follows:
 
 ```py
 result = client.service.getPercentBodyFat('jeff', 68, 170)
-print result
+print(result)
 
 You have 21% body fat.
 ```
 
 ```py
 result = client.service.getPercentBodyFat(name='jeff', height=68, weight=170)
-print result
+print(result)
 
 You have 21% body fat.
 ```
@@ -217,7 +217,7 @@ You have 21% body fat.
 ```py
 d = dict(name='jeff', height=68, weight=170)
 result = client.service.getPercentBodyFat(**d)
-print result
+print(result)
 
 You have 21% body fat.
 ```
@@ -237,7 +237,7 @@ follows:
 
 ```py
 person = client.factory.create('Person')
-print person
+print(person)
 
 (Person)=
   {
@@ -290,7 +290,7 @@ person.phone.append(phone)
 try:
    person_added = client.service.addPerson(person)
 except WebFault as e:
-  print e
+  print(e)
 ```
 
 It\'s that easy.
@@ -357,7 +357,7 @@ person['phone'] = [phone,]
 try:
    person_added = client.service.addPerson(person)
 except WebFault as e:
-  print e
+  print(e)
 ```
 
 ### Faults
@@ -368,7 +368,7 @@ return a tuple (\<status\>, \<returned-value\>) instead as follows:
 ```py
 client = client(url, faults=False)
 result = client.service.addPerson(person)
-print result
+print(result)
 
 ( 200, person ...)
 ```
@@ -426,7 +426,7 @@ Various ways that suds behaves can be customized by swapping out custom
 
 In some unreleased versions of suds-jurko, all children elements were populated with empty lists. This was fixed in suds-community as a regression. This can be desired behavior as it simplifies constructing complex requests. To obtain the prior behavior, use a custom `Builder` class, for example:
 
-```
+```py
 from suds.client import Client, Builder
 
 class AlwaysInitializeBuilder(Builder):
@@ -518,7 +518,7 @@ And are reported by suds as:
 ```py
 url = 'http://www.thomas-bayer.com/axis2/services/BLZService?wsdl'
 client = Client(url)
-print client
+print(client)
 
 Suds - version: 0.3.3 build: (beta) R397-20081121
 
@@ -647,7 +647,7 @@ And are reported by suds as:
 ```py
 url = 'http://www.thomas-bayer.com/axis2/services/BLZService?wsdl'
 client = Client(url)
-print client
+print(client)
 
 Suds - version: 0.3.7 build: (beta) R550-20090820
 
@@ -1080,7 +1080,7 @@ message = \
     </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>"""
 
-print client.service.test(__inject={'msg':message})
+print(client.service.test(__inject={'msg':message}))
 ```
 
 Injecting a response for testing:
@@ -1094,7 +1094,7 @@ reply = \
     </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>"""
 
-print client.service.test(__inject={'reply':reply})
+print(client.service.test(__inject={'reply':reply}))
 ```
 
 ## SSL certificate verification & Custom Certificates
@@ -1105,7 +1105,7 @@ This can be a problem when suds is used against an endpoint which has a self-sig
 
 One approach to turn off certificate validation in suds is to use a custom transport class. For example in Python 3:
 
-```
+```py
 import urllib.request
 import ssl
 import suds.transport.http
@@ -1128,7 +1128,7 @@ client = Client(url, transport=UnverifiedHttpsTransport())
 
 In addition, if a custom set of certificates and/or root CA is needed, this can also be done via a custom transport class. For example, in Python 3:
 
-```
+```py
 class ClientHttpsTransport(HttpTransport):
     def __init__(self, certfile, keyfile, cafile, *args, **kwargs):
         super(ClientHttpsTransport, self).__init__(*args, **kwargs)
@@ -1178,17 +1178,13 @@ The default cache is a
 This duration may be adjusted as follows:
 
 ```py
+import datetime
+ ...
 cache = client.options.cache
-cache.setduration(days=10)
+cache.duration = datetime.timedelta(days=10)
 ```
 
-OR
-
-```py
- cache.setduration(seconds=90)
-```
-
-The duration my be (months, weeks, days, hours, seconds ).
+The duration must be a `datetime.timedelta`.
 
 The default location (directory) is /tmp/suds so
 Windows users will need to set the location to something
@@ -1352,11 +1348,11 @@ document. The context contains the url & document `root`.
 
 The `MessagePlugin` currently has (5) hooks ::
 
-*marshalled():: Provides the plugin with the opportunity to inspect/modify the envelope Document __before__ it is sent.
-* sending():: Provides the plugin with the opportunity to inspect/modify the message text __before__ it is sent.
-* received():: Provides the plugin with the opportunity to inspect/modify the received XML text __before__ it is SAX parsed.
-* parsed():: Provides the plugin with the opportunity to inspect/modify the sax parsed DOM tree for the reply __before__ it is unmarshalled.
-* unmarshalled():: Provides the plugin with the opportunity to inspect/modify the unmarshalled reply __before__ it is returned to the caller.
+* `marshalled()` :: Provides the plugin with the opportunity to inspect/modify the envelope Document __before__ it is sent.
+* `sending()` :: Provides the plugin with the opportunity to inspect/modify the message text __before__ it is sent.
+* `received()` :: Provides the plugin with the opportunity to inspect/modify the received XML text __before__ it is SAX parsed.
+* `parsed()` :: Provides the plugin with the opportunity to inspect/modify the sax parsed DOM tree for the reply __before__ it is unmarshalled.
+* `unmarshalled()` :: Provides the plugin with the opportunity to inspect/modify the unmarshalled reply __before__ it is returned to the caller.
 
 General usage:
 
@@ -1380,25 +1376,29 @@ doctor, we can do this.
 
 Say our envelope is being generated by suds as:
 
-    <soapenv:Envelope>
-      <soapenv:Body>
-        <ns0:foo>
-          <name>Elmer Fudd</name>
-          <age>55</age>
-        </ns0:foo>
-      </soapenv:Body>
-    </soapenv:Envelope>
+```xml
+<soapenv:Envelope>
+  <soapenv:Body>
+    <ns0:foo>
+      <name>Elmer Fudd</name>
+      <age>55</age>
+    </ns0:foo>
+  </soapenv:Body>
+</soapenv:Envelope>
+```
 
 But what you need is:
 
-    <soapenv:Envelope>
-      <soapenv:Body>
-        <ns0:foo id="1234" version="2.0">
-          <name>Elmer Fudd</name>
-          <age>55</age>
-        </ns0:foo>
-      </soapenv:Body>
-    </soapenv:Envelope>
+```xml
+<soapenv:Envelope>
+  <soapenv:Body>
+    <ns0:foo id="1234" version="2.0">
+      <name>Elmer Fudd</name>
+      <age>55</age>
+    </ns0:foo>
+  </soapenv:Body>
+</soapenv:Envelope>
+```
 
 ```py
 from suds.plugin import MessagePlugin
