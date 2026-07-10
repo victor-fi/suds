@@ -29,10 +29,7 @@ prefix and the URI, e.g. I{('tns', 'http://myns')}
 """
 
 from suds.sax.enc import Encoder
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse
+from urllib.parse import urlparse
 
 # pluggable XML special character encoder.
 encoder = Encoder()
