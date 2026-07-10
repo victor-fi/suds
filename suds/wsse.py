@@ -167,7 +167,7 @@ class UsernameToken(Token):
         @type text: str
         """
         if text is None:
-            self.nonce = binascii.hexlify(os.urandom(16)).decode('ascii')
+            self.nonce = binascii.b2a_base64(os.urandom(16), newline=False).decode('ascii')
         else:
             self.nonce = text
 
