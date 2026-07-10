@@ -24,12 +24,8 @@ from suds.sudsobject import Object
 from suds.sax.element import Element
 from suds.sax.date import DateTime, UtcTimezone
 from datetime import datetime, timedelta
-
-try:
-    from hashlib import md5
-except ImportError:
-    # Python 2.4 compatibility
-    from md5 import md5
+import os
+import binascii
 
 
 dsns = \
@@ -171,18 +167,7 @@ class UsernameToken(Token):
         @type text: str
         """
         if text is None:
-            s = []
-            s.append(self.username)
-            s.append(self.password)
-            s.append(Token.sysdate())
-            try:
-                # FIPS requires usedforsecurity=False and might not be
-                # available on all distros: https://bugs.python.org/issue9216
-                m = md5(usedforsecurity=False)
-            except (AttributeError, TypeError):
-                m = md5()
-            m.update(':'.join(s).encode('utf-8'))
-            self.nonce = m.hexdigest()
+            self.nonce = binascii.b2a_base64(os.urandom(16), newline=False).decode('ascii')
         else:
             self.nonce = text
 

@@ -29,6 +29,7 @@ prefix and the URI, e.g. I{('tns', 'http://myns')}
 """
 
 from suds.sax.enc import Encoder
+from urllib.parse import urlparse
 
 # pluggable XML special character encoder.
 encoder = Encoder()
@@ -90,7 +91,8 @@ class Namespace:
     @classmethod
     def w3(cls, ns):
         try:
-            return ns[1].startswith("http://www.w3.org")
+            parsed = urlparse(ns[1])
+            return parsed.scheme in ("http", "https") and parsed.hostname == "www.w3.org"
         except Exception:
             pass
         return False
