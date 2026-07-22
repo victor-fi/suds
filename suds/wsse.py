@@ -81,7 +81,7 @@ class Security(Object):
         root.set('mustUnderstand', str(self.mustUnderstand).lower())
 
         if self.useTimestamp:
-            now = Token.utc()
+            now = Token.utc().replace(microsecond=0)
             exp_ts = now + timedelta(seconds=self.validity)
 
             ts = Element('Timestamp', ns=wsuns)
